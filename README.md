@@ -1,34 +1,65 @@
-# All-in-One Media Server Docker
+# All-in-One Media Server Docker (Latest Versions)
 
-A comprehensive Docker Compose setup for running a complete media server stack including automation tools, media servers, and download clients.
+⚠️ **WARNING: LATEST BRANCH STABILITY NOTICE** ⚠️
+
+This branch uses the latest versions of all containers (`latest` tags). While this provides access to the newest features, it may lead to:
+- Unexpected behavior
+- Service interruptions
+- Compatibility issues
+- Database corruption
+- Broken functionality after updates
+
+**For a stable production environment, use the main branch main
 
 ## Features
 
 - **Media Servers**
-  - Emby (port 8096)
-  - Jellyfin (port 8097)
+  - Emby (latest) - Modern media server
+  - Jellyfin (latest) - Open-source media server
 - **Media Management**
-  - Sonarr (port 8989) - TV Shows automation
-  - Radarr (port 7878) - Movies automation
-  - Prowlarr (port 9696) - Indexer management
+  - Sonarr (latest) - TV Shows automation
+  - Radarr (latest) - Movies automation
+  - Prowlarr (latest) - Indexer management
 - **Download Client**
-  - qBittorrent (port 8080)
+  - qBittorrent (latest)
 - **Additional Services**
-  - FlareSolverr (port 8191) - Bypass Cloudflare protection
+  - FlareSolverr (latest) - Cloudflare bypass solution
+
+## Version Information
+
+All services use the `latest` tag from their respective repositories:
+```yaml
+sonarr:
+    image: linuxserver/sonarr:latest
+radarr:
+    image: linuxserver/radarr:latest
+prowlarr:
+    image: linuxserver/prowlarr:latest
+flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+emby:
+    image: emby/embyserver:latest  # or emby/embyserver_arm64v8:latest for ARM
+jellyfin:
+    image: linuxserver/jellyfin:latest
+qbittorrent:
+    image: linuxserver/qbittorrent:latest
+```
 
 ## Prerequisites
 
-- Docker
-- Docker Compose
+- Docker (latest version recommended)
+- Docker Compose V2
 - Sufficient storage space for media files
 - Basic understanding of Docker and networking
+- Backup solution in place (strongly recommended)
 
 ## Installation
 
-1. Clone this repository:
+1. Clone the repository and switch to the latest branch:
 ```bash
 git clone https://github.com/yourusername/all-in-one-media-server-docker.git
 cd all-in-one-media-server-docker
+git checkout latest
 ```
 
 2. Create your environment file:
@@ -36,15 +67,13 @@ cd all-in-one-media-server-docker
 cp .env.template .env
 ```
 
-3. Edit the `.env` file with your specific settings:
+3. Edit the `.env` file with your settings:
 ```plaintext
 TZ="America/New_York"
 PUID=1000
 PGID=1000
 USERDIR=/path/to/Local_Media_Server
 ```
-
-Note: Replace `/path/to/Local_Media_Server` with your actual media storage path.
 
 4. Create the required directories:
 ```bash
@@ -54,7 +83,7 @@ mkdir -p ${USERDIR}/media/{movies,tv,downloads}
 
 5. Start the stack:
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 ## Directory Structure
@@ -76,8 +105,7 @@ Local_Media_Server/
 
 ## Service Access
 
-After starting the stack, services can be accessed at:
-
+Services are available at:
 - Sonarr: `http://localhost:8989`
 - Radarr: `http://localhost:7878`
 - Prowlarr: `http://localhost:9696`
@@ -86,88 +114,113 @@ After starting the stack, services can be accessed at:
 - qBittorrent: `http://localhost:8080`
 - FlareSolverr: `http://localhost:8191`
 
-## Default Credentials
+## Update Management
 
-- qBittorrent:
-  - Username: `admin`
-  - Password: `adminadmin`
+### Automatic Updates Warning ⚠️
 
-## Configuration
+If you enable automatic updates in any of the services, be aware that this may cause version mismatches and stability issues. Consider these guidelines:
 
-### Permissions
+1. Always check the GitHub releases/changelog before updating
+2. Update one service at a time
+3. Monitor logs after updates
+4. Have a backup ready
+5. Consider setting up monitoring for service availability
 
-The PUID and PGID in the .env file should match your user's UID and GID. You can find these by running:
+### Manual Update Process
+
 ```bash
-id $USER
+# Pull new images
+docker compose pull
+
+# Update services one at a time (recommended)
+docker compose up -d sonarr
+# Wait and verify functionality
+docker compose up -d radarr
+# And so on...
+
+# Or update all at once (risky)
+docker compose up -d
 ```
 
-### Time Zone
+## Rollback Process
 
-Set your correct timezone in the .env file. Find your timezone in the [TZ database](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
+If you encounter issues after an update:
 
-### Architecture Note
-
-The Emby service includes two image options:
-- `emby/embyserver:4.9.0.34` for x86 systems
-- `emby/embyserver_arm64v8:4.9.0.34` for ARM systems (e.g., Raspberry Pi)
-
-Uncomment the appropriate line in the docker-compose.yml file for your system architecture.
-
-## Usage
-
-### Basic Commands
-
-Start the stack:
+1. Stop the problematic service:
 ```bash
-docker-compose up -d
+docker compose stop [service_name]
 ```
 
-Stop the stack:
+2. Remove the container:
 ```bash
-docker-compose down
+docker compose rm [service_name]
 ```
 
-View logs:
+3. Pull a specific older version:
 ```bash
-docker-compose logs -f [service_name]
+docker pull linuxserver/[service_name]:previous_version
 ```
 
-Update all containers:
+4. Update docker-compose.yml with the specific version
+5. Restart the service:
 ```bash
-docker-compose pull
-docker-compose up -d
+docker compose up -d [service_name]
 ```
 
-## Service Integration
+## Monitoring and Maintenance
 
-1. Configure Prowlarr first and add your preferred indexers
-2. In Prowlarr, add Sonarr and Radarr as applications
-3. Configure qBittorrent in both Sonarr and Radarr as your download client
-4. Configure your media paths in Sonarr and Radarr
-5. Set up your media libraries in Emby and/or Jellyfin
+### Log Monitoring
+```bash
+# Watch logs for stability issues
+docker compose logs -f [service_name]
+```
 
-## Maintenance
+### Health Checks
 
-### Backup
+Monitor container health:
+```bash
+docker compose ps
+docker stats
+```
 
-Important directories to backup:
-- All directories in the `config` folder
-- Database files for each service
+### Backup Requirements
 
-### Updates
+Critical to maintain backups when running latest versions:
+- All configuration directories
+- Database files
+- Docker Compose and environment files
 
-Check the [LinuxServer.io](https://linuxserver.io/) website for the latest versions of containers and update the image tags in docker-compose.yml accordingly.
+## Troubleshooting Latest Versions
+
+Common issues and solutions:
+
+1. Container fails to start after update:
+   - Check logs: `docker compose logs [service_name]`
+   - Verify compatibility with other services
+   - Consider rolling back to previous version
+
+2. Database errors:
+   - Stop the container
+   - Restore from backup
+   - Check for known issues with the latest version
+
+3. API compatibility issues:
+   - Ensure all interconnected services are compatible
+   - Check GitHub issues for known problems
+   - Consider downgrading affected services
 
 ## Contributing
 
-Feel free to submit issues and pull requests.
+- Report bugs and version compatibility issues
+- Share successful/unsuccessful version combinations
+- Submit improvements to documentation
 
-## License
+## Support and Resources
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgments
-
-- [LinuxServer.io](https://linuxserver.io/) for maintaining most of the containers
-- [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr) team
-- Emby and Jellyfin teams for their media server software
+- [Sonarr GitHub](https://github.com/Sonarr/Sonarr)
+- [Radarr GitHub](https://github.com/Radarr/Radarr)
+- [Prowlarr GitHub](https://github.com/Prowlarr/Prowlarr)
+- [LinuxServer.io](https://linuxserver.io/)
+- [FlareSolverr GitHub](https://github.com/FlareSolverr/FlareSolverr)
+- [Emby](https://emby.media/)
+- [Jellyfin](https://jellyfin.org/)

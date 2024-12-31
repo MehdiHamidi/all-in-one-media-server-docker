@@ -1,6 +1,6 @@
 services:
     sonarr:
-        image: linuxserver/sonarr:4.0.11
+        image: linuxserver/sonarr:latest
         container_name: sonarr
         restart: always
         depends_on:
@@ -17,7 +17,7 @@ services:
                 - TZ=${TZ}
 
     radarr:
-        image: linuxserver/radarr:5.16.3
+        image: linuxserver/radarr:latest
         container_name: radarr
         restart: always
         depends_on:
@@ -34,7 +34,7 @@ services:
                 - TZ=${TZ}
 
     prowlarr:
-        image: linuxserver/prowlarr:1.28.2.4885-ls97
+        image: linuxserver/prowlarr:latest
         container_name: prowlarr
         restart: always
         ports:
@@ -47,7 +47,7 @@ services:
                 - TZ=${TZ}
     
     flaresolverr:
-        image: ghcr.io/flaresolverr/flaresolverr:v3.3.21
+        image: ghcr.io/flaresolverr/flaresolverr:latest
         container_name: flaresolverr
         environment:
                 - LOG_LEVEL=${LOG_LEVEL:-info}
@@ -58,8 +58,8 @@ services:
                 - 8191:8191
 
     emby:
-        # image: emby/embyserver:4.9.0.34 # for x86 systems
-        image: emby/embyserver_arm64v8:4.9.0.34 # for ARM systems
+        # image: emby/embyserver:latest # for x86 systems
+        image: emby/embyserver_arm64v8:latest # for ARM systems
         restart: always
         ports:
                 - "8096:8096"
@@ -74,7 +74,7 @@ services:
                 - USERID=${PUID}
                 - GROUPID=${PGID}
     jellyfin:
-        image: linuxserver/jellyfin:10.10.3
+        image: linuxserver/jellyfin:latest
         container_name: jellyfin
         environment:
                 - PUID=1000
@@ -88,7 +88,7 @@ services:
                 - 8097:8096
 
     qbittorrent:
-        image: linuxserver/qbittorrent:5.0.3
+        image: linuxserver/qbittorrent:latest
         container_name: qbittorrent
         environment:
                 - PUID=1000
