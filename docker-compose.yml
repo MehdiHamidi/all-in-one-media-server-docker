@@ -1,0 +1,106 @@
+services:
+    sonarr:
+        image: linuxserver/sonarr:4.0.11
+        container_name: sonarr
+        restart: always
+        depends_on:
+                - prowlarr
+        ports:
+                - "8989:8989"
+        volumes:
+                - ${USERDIR}/config/sonarr:/config
+                - ${USERDIR}/media/downloads:/downloads
+                - ${USERDIR}/media/tv:/tv
+        environment:
+                - PUID=${PUID}
+                - PGID=${PGID}
+                - TZ=${TZ}
+
+    radarr:
+        image: linuxserver/radarr:5.16.3
+        container_name: radarr
+        restart: always
+        depends_on:
+                - prowlarr
+        ports:
+                - "7878:7878"
+        volumes:
+                - ${USERDIR}/config/radarr:/config
+                - ${USERDIR}/media/downloads:/downloads
+                - ${USERDIR}/media/movies:/movies
+        environment:
+                - PUID=${PUID}
+                - PGID=${PGID}
+                - TZ=${TZ}
+
+    prowlarr:
+        image: linuxserver/prowlarr:1.28.2.4885-ls97
+        container_name: prowlarr
+        restart: always
+        ports:
+                - 9696:9696
+        volumes:
+                - ${USERDIR}/config/prowlarr:/config
+        environment:
+                - PUID=${PUID}
+                - PGID=${PGID}
+                - TZ=${TZ}
+    
+    flaresolverr:
+        image: ghcr.io/flaresolverr/flaresolverr:v3.3.21
+        container_name: flaresolverr
+        environment:
+                - LOG_LEVEL=${LOG_LEVEL:-info}
+                - LOG_HTML=${LOG_HTML:-false}
+                - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-none}
+                - TZ=${TZ}
+        ports:
+                - 8191:8191
+
+    emby:
+        # image: emby/embyserver:4.9.0.34 # for x86 systems
+        image: emby/embyserver_arm64v8:4.9.0.34 # for ARM systems
+        restart: always
+        ports:
+                - "8096:8096"
+        expose:
+                - "7359/udp"
+                - "1900/udp"
+        volumes:
+                - ${USERDIR}/config/emby:/config
+                - ${USERDIR}/media/movies:/media/movies
+                - ${USERDIR}/media/tv:/media/tv
+        environment:
+                - USERID=${PUID}
+                - GROUPID=${PGID}
+    jellyfin:
+        image: linuxserver/jellyfin:10.10.3
+        container_name: jellyfin
+        environment:
+                - PUID=1000
+                - PGID=1000
+                - TZ=${TZ}
+        volumes:
+                - ${USERDIR}/config/jellyfin/library:/config
+                - ${USERDIR}/media/movies:/media/movies
+                - ${USERDIR}/media/tv:/media/tv
+        ports:
+                - 8097:8096
+
+    qbittorrent:
+        image: linuxserver/qbittorrent:5.0.3
+        container_name: qbittorrent
+        environment:
+                - PUID=1000
+                - PGID=1000
+                - TZ=${TZ}
+                - WEBUI_PORT=8080
+                - TORRENTING_PORT=6881
+        volumes:
+                - ${USERDIR}/config/qbittorrent:/config
+                - ${USERDIR}/media/downloads:/downloads #optional
+        ports:
+                - 8080:8080
+                - 6881:6881
+                - 6881:6881/udp
+
