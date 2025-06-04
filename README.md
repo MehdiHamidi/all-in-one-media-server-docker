@@ -16,6 +16,7 @@ This branch uses the latest versions of all containers (`latest` tags). While th
 - **Media Servers**
   - Emby (latest) - Modern media server
   - Jellyfin (latest) - Open-source media server
+  - Plex (latest) - Media server
 - **Media Management**
   - Sonarr (latest) - TV Shows automation
   - Radarr (latest) - Movies automation

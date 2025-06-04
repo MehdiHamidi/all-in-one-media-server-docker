@@ -49,6 +49,7 @@ services:
     flaresolverr:
         image: ghcr.io/flaresolverr/flaresolverr:latest
         container_name: flaresolverr
+        restart: always
         environment:
                 - LOG_LEVEL=${LOG_LEVEL:-info}
                 - LOG_HTML=${LOG_HTML:-false}
@@ -56,6 +57,24 @@ services:
                 - TZ=${TZ}
         ports:
                 - 8191:8191
+
+    plex:
+        image: linuxserver/plex:latest
+        container_name: plex
+        restart: always
+        ports:
+                - 32400:32400
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - TZ=${TZ}
+            - VERSION=docker
+            - ADVERTISE_IP=http://http://192.168.50.149/:32400 # Replace with your server's LAN IP
+
+        volumes:
+            - ${USERDIR}/config/plex:/config
+            - ${USERDIR}/media/tv:/tv
+            - ${USERDIR}/media/movies:/movies
 
     emby:
         # image: emby/embyserver:latest # for x86 systems
@@ -76,6 +95,7 @@ services:
     jellyfin:
         image: linuxserver/jellyfin:latest
         container_name: jellyfin
+        restart: always
         environment:
                 - PUID=1000
                 - PGID=1000
@@ -90,6 +110,7 @@ services:
     qbittorrent:
         image: linuxserver/qbittorrent:latest
         container_name: qbittorrent
+        restart: always
         environment:
                 - PUID=1000
                 - PGID=1000
